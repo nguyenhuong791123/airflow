@@ -1,0 +1,106 @@
+version: '2'
+
+services:
+  airflow-db:
+    image: mysql:5.7
+    volumes:
+      - /home/db:/var/lib/mysql
+      - /home/airflow/dags/airflow/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: airflow-db
+      MYSQL_DATABASE: airflow
+      MYSQL_USER: airflow
+      MYSQL_PASSWORD: ariflow-db
+      MYSQL_PORT: 3306
+      TZ: 'Asia/Tokyo'
+    ports:
+      - "3306:3306"
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+
+  airflow-broker:
+    image: redis:4-alpine
+  
+  airflow-scheduler:
+    image: nhdocker/airflow:v01
+    volumes:
+      - /home/airflow/dags:/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - airflow-db
+      - airflow-broker
+    environment:
+      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+      MYSQL_PORT_3306_TCP_ADDR: airflow-db
+      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+
+  airflow-webserver:
+    image: nhdocker/airflow:v01
+    volumes:
+      - /home/airflow/dags:/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "38080:8080"
+    depends_on:
+      - airflow-scheduler
+    environment:
+      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+      MYSQL_PORT_3306_TCP_ADDR: airflow-db
+      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+    entrypoint: /root/entrypoint_webserver.sh
+    links:
+      - airflow-db
+      - airflow-broker
+
+  airflow-worker:
+    image: nhdocker/airflow:v01
+    volumes:
+      - /home/airflow/dags:/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    depends_on:
+      - airflow-webserver
+    environment:
+      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+      MYSQL_PORT_3306_TCP_ADDR: airflow-db
+      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+    entrypoint: /root/entrypoint_worker.sh
+    links:
+      - airflow-db
+      - airflow-broker
+
+  airflow-flower:
+    image: nhdocker/airflow:v01
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "5555:5555"
+    depends_on:
+      - airflow-webserver
+    environment:
+      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+      MYSQL_PORT_3306_TCP_ADDR: airflow-db
+      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+    entrypoint: /root/entrypoint_flower.sh
+    links:
+      - airflow-db
+      - airflow-broker
+
+  airflow-vscode:
+    image: codercom/code-server
+    volumes:
+      - /home/airflow:/home/coder/project
+    restart: always
+    ports:
+      - "3443:8443"
+    entrypoint: "code-server --allow-http --no-auth"
