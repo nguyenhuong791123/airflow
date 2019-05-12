@@ -30,7 +30,7 @@ PROCESSOR_LOG_FOLDER = conf.get('scheduler', 'child_process_log_directory')
 FILENAME_TEMPLATE = '{{ ti.dag_id }}/{{ ti.task_id }}/{{ ts }}/{{ try_number }}.log'
 PROCESSOR_FILENAME_TEMPLATE = '{{ filename }}.log'
 
-S3_LOG_FOLDER = 's3://bucket-name/path'
+S3_LOG_FOLDER = 's3://s3-airflow-logs/af-worker'
 
 LOGGING_CONFIG = {
     'version': 1,

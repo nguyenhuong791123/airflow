@@ -1,7 +1,8 @@
 version: '2'
 
 services:
-  airflow-db:
+  af-db:
+    container_name: "af-db"
     image: mysql:5.7
     volumes:
       - /home/db:/var/lib/mysql
@@ -18,10 +19,13 @@ services:
       - "3306:3306"
     command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
 
-  airflow-broker:
+  af-redis:
+    container_name: "af-redis"
     image: redis:4-alpine
+    restart: always
   
-  airflow-scheduler:
+  af-scheduler:
+    container_name: "af-scheduler"
     image: nhdocker/airflow:v01
     volumes:
       - /home/airflow/dags:/airflow/dags
@@ -30,14 +34,16 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - airflow-db
-      - airflow-broker
+      - af-db
+      - af-redis
     environment:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
-      MYSQL_PORT_3306_TCP_ADDR: airflow-db
-      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+      MYSQL_PORT_3306_TCP_ADDR: af-db
+      REDIS_PORT_6379_TCP_ADDR: af-redis
+      AWS_S3_BUCKET_NAME: s3-aiflow-logs
 
-  airflow-webserver:
+  af-webserver:
+    container_name: "af-webserver"
     image: nhdocker/airflow:v01
     volumes:
       - /home/airflow/dags:/airflow/dags
@@ -48,17 +54,19 @@ services:
     ports:
       - "38080:8080"
     depends_on:
-      - airflow-scheduler
+      - af-scheduler
     environment:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
-      MYSQL_PORT_3306_TCP_ADDR: airflow-db
-      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+      MYSQL_PORT_3306_TCP_ADDR: af-db
+      REDIS_PORT_6379_TCP_ADDR: af-redis
+      AWS_S3_BUCKET_NAME: s3-aiflow-logs
     entrypoint: /root/entrypoint_webserver.sh
     links:
-      - airflow-db
-      - airflow-broker
+      - af-db
+      - af-redis
 
-  airflow-worker:
+  af-worker:
+    container_name: "af-worker"
     image: nhdocker/airflow:v01
     volumes:
       - /home/airflow/dags:/airflow/dags
@@ -67,17 +75,19 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - airflow-webserver
+      - af-webserver
     environment:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
-      MYSQL_PORT_3306_TCP_ADDR: airflow-db
-      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+      MYSQL_PORT_3306_TCP_ADDR: af-db
+      REDIS_PORT_6379_TCP_ADDR: af-redis
+      AWS_S3_BUCKET_NAME: s3-aiflow-logs
     entrypoint: /root/entrypoint_worker.sh
     links:
-      - airflow-db
-      - airflow-broker
+      - af-db
+      - af-redis
 
-  airflow-flower:
+  af-flower:
+    container_name: "af-flower"
     image: nhdocker/airflow:v01
     build:
       context: .
@@ -86,21 +96,62 @@ services:
     ports:
       - "5555:5555"
     depends_on:
-      - airflow-webserver
+      - af-webserver
     environment:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
-      MYSQL_PORT_3306_TCP_ADDR: airflow-db
-      REDIS_PORT_6379_TCP_ADDR: airflow-broker
+      MYSQL_PORT_3306_TCP_ADDR: af-db
+      REDIS_PORT_6379_TCP_ADDR: af-redis
+      AWS_S3_BUCKET_NAME: s3-airflow-logs
     entrypoint: /root/entrypoint_flower.sh
     links:
-      - airflow-db
-      - airflow-broker
+      - af-db
+      - af-redis
 
-  airflow-vscode:
-    image: codercom/code-server
-    volumes:
-      - /home/airflow:/home/coder/project
-    restart: always
-    ports:
-      - "3443:8443"
-    entrypoint: "code-server --allow-http --no-auth"
+  # af-vscode:
+  #   container_name: "af-vscode"
+  #   image: codercom/code-server
+  #   volumes:
+  #     - /home/airflow:/home/coder/project
+  #   restart: always
+  #   ports:
+  #     - "3443:8443"
+  #   entrypoint: "code-server --allow-http --no-auth"
+
+  # af-phpadmin:
+  #   container_name: "af-phpadmin"
+  #   image: phpmyadmin/phpmyadmin
+  #   environment:
+  #     - PMA_ARBITRARY=1
+  #     - PMA_HOST=af-db
+  #     - PMA_USER=root
+  #     - PMA_PASSWORD=airflow-db
+  #   links:
+  #     - af-db
+  #   ports:
+  #     - 48080:80
+  #   volumes:
+  #     - /home/phpadmin:/sessions
+
+  # af-redisui:
+  #   container_name: "af-redisui"
+  #   image: tenstartups/redis-commander
+  #   command: --redis-host af-redis
+  #   links:
+  #     - af-redis
+  #   ports:
+  #     - '48081:8081'
+
+  # af-nginx:
+  #   container_name: "af-nginx"
+  #   image: nhdocker/airflow_nginx:v01
+  #   build:
+  #     context: .
+  #     dockerfile: nginx/Dockerfile
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   links:
+  #     - af-webserver
+  #     - af-vscode
+  #     - af-phpadmin
+  #     - af-redisui
