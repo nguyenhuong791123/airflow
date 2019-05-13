@@ -6,7 +6,7 @@ services:
     image: mysql:5.7
     volumes:
       - /home/db:/var/lib/mysql
-      - /home/airflow/dags/airflow/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+      - /home/airflow/docker/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: airflow-db
