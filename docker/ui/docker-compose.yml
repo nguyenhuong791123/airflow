@@ -6,6 +6,7 @@ services:
     image: codercom/code-server
     volumes:
       - /home/airflow:/home/coder/project
+    network_mode: airflow_default
     restart: always
     ports:
       - "3443:8443"
@@ -37,17 +38,18 @@ services:
       - '48081:8081'
     command: --redis-host af-redis
 
-#  af-nginx:
-#    container_name: "af-nginx"
-#    image: nhdocker/airflow_nginx:v01
-#    build:
-#      context: .
-#      dockerfile: nginx/Dockerfile
-#    restart: always
-#    ports:
-#      - "80:80"
-#    external_links:
-#      - af-webserver
-#      - af-vscode
-#      - af-phpadmin
-#      - af-redisui
+  # af-nginx:
+  #   container_name: "af-nginx"
+  #   image: nhdocker/airflow_nginx:v01
+  #   build:
+  #     context: .
+  #     dockerfile: nginx/Dockerfile
+  #   network_mode: airflow_default
+  #   restart: always
+  #   ports:
+  #     - "80:80"
+  #   external_links:
+  #     - af-webserver
+  #     - af-vscode
+  #     - af-phpadmin
+  #     - af-redisui
