@@ -6,7 +6,7 @@ services:
     image: codercom/code-server
     volumes:
       - /home/airflow:/home/coder/project
-    network_mode: airflow_default
+    network_mode: docker_default
     restart: always
     ports:
       - "3443:8443"
@@ -20,7 +20,7 @@ services:
       - PMA_HOST=af-db
       - PMA_USER=root
       - PMA_PASSWORD=airflow-db
-    network_mode: airflow_default
+    network_mode: docker_default
     external_links:
       - af-db
     ports:
@@ -31,7 +31,7 @@ services:
   af-redisui:
     container_name: "af-redisui"
     image: tenstartups/redis-commander
-    network_mode: airflow_default
+    network_mode: docker_default
     external_links:
       - af-redis
     ports:
@@ -44,7 +44,7 @@ services:
   #   build:
   #     context: .
   #     dockerfile: nginx/Dockerfile
-  #   network_mode: airflow_default
+  #   network_mode: docker_default
   #   restart: always
   #   ports:
   #     - "80:80"
