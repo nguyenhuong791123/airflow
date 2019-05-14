@@ -67,17 +67,17 @@ RUN pip install --default-timeout 6000 "apache-airflow[celery, mysql, password, 
 RUN pip install --default-timeout 6000 boto3
 RUN apk del .build-deps mariadb-dev build-base
 
-ADD airflow.cfg /root/airflow.cfg
-ADD entrypoint.sh /root/entrypoint.sh
-ADD entrypoint_webserver.sh /root/entrypoint_webserver.sh
-ADD entrypoint_worker.sh /root/entrypoint_worker.sh
-ADD entrypoint_flower.sh /root/entrypoint_flower.sh
+ADD ../airflow.cfg /root/airflow.cfg
+ADD ../entrypoint.sh /root/entrypoint.sh
+ADD ../entrypoint_webserver.sh /root/entrypoint_webserver.sh
+ADD ../entrypoint_worker.sh /root/entrypoint_worker.sh
+ADD ../entrypoint_flower.sh /root/entrypoint_flower.sh
 RUN chmod +x /root/entrypoint.sh
 RUN chmod +x /root/entrypoint_webserver.sh
 RUN chmod +x /root/entrypoint_worker.sh
 RUN chmod +x /root/entrypoint_flower.sh
 RUN mkdir -p /airflow/config && touch /airflow/config/__init__.py
-ADD log_config.py /airflow/config/log_config.py
+ADD ../log_config.py /airflow/config/log_config.py
 ENV PYTHONPATH /airflow/config/
 
 VOLUME ["/airflow/dags", "/airflow/logs", "/airflow/plugins"]

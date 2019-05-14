@@ -3,12 +3,12 @@ version: '2'
 services:
   af-worker:
     container_name: "af-worker"
-    image: nhdocker/airflow:v01
+    image: nhdocker/airflow:v02
     volumes:
       - /home/airflow/dags:/airflow/dags
     build:
       context: .
-      dockerfile: ../Dockerfile
+      dockerfile: Dockerfile
     restart: always
     depends_on:
       - af-webserver

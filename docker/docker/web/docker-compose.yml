@@ -3,12 +3,12 @@ version: '2'
 services:
   af-scheduler:
     container_name: "af-scheduler"
-    image: nhdocker/airflow:v01
+    image: nhdocker/airflow:v02
     volumes:
       - /home/airflow/dags:/airflow/dags
     build:
       context: .
-      dockerfile: ../Dockerfile
+      dockerfile: Dockerfile
     restart: always
     environment:
       MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
@@ -18,12 +18,12 @@ services:
 
   af-webserver:
     container_name: "af-webserver"
-    image: nhdocker/airflow:v01
+    image: nhdocker/airflow:v02
     volumes:
       - /home/airflow/dags:/airflow/dags
     build:
       context: .
-      dockerfile: ../Dockerfile
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "38080:8080"
@@ -38,10 +38,10 @@ services:
 
   af-flower:
     container_name: "af-flower"
-    image: nhdocker/airflow:v01
+    image: nhdocker/airflow:v02
     build:
       context: .
-      dockerfile: ../Dockerfile
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "5555:5555"
