@@ -1,0 +1,58 @@
+#docker-compose -f docker-compose-web.yml up --build
+version: '3'
+
+services:
+  af-scheduler:
+    container_name: "af-scheduler"
+    image: nhdocker/airflow:v02
+    volumes:
+      - /home/dags:/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - airflow.env
+#    environment:
+#      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+#      MYSQL_PORT_3306_TCP_ADDR: 192.168.56.21
+#      REDIS_PORT_6379_TCP_ADDR: 192.168.56.21
+#      AWS_S3_BUCKET_NAME: s3-aiflow-logs
+
+#  af-webserver:
+#    container_name: "af-webserver"
+#    image: nhdocker/airflow:v02
+#    volumes:
+#      - /home/dags:/airflow/dags
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - "38080:8080"
+#    depends_on:
+#      - af-scheduler
+#    environment:
+#      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+#      MYSQL_PORT_3306_TCP_ADDR: 192.168.56.21
+#      REDIS_PORT_6379_TCP_ADDR: 192.168.56.21
+#      AWS_S3_BUCKET_NAME: s3-aiflow-logs
+#    entrypoint: /root/entrypoint_webserver.sh
+
+#  af-flower:
+#    container_name: "af-flower"
+#    image: nhdocker/airflow:v02
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    restart: always
+#    ports:
+#      - "5555:5555"
+#    depends_on:
+#      - af-webserver
+#    environment:
+#      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+#      MYSQL_PORT_3306_TCP_ADDR: 192.168.56.21
+#      REDIS_PORT_6379_TCP_ADDR: 192.168.56.21
+#      AWS_S3_BUCKET_NAME: s3-airflow-logs
+#    entrypoint: /root/entrypoint_flower.sh

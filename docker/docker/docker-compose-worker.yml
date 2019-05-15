@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  af-worker:
+#    container_name: "af-worker"
+    image: nhdocker/airflow:v02
+    volumes:
+      - /home/dags:/airflow/dags
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - airflow.env
+#    environment:
+#      MYSQL_ENV_MYSQL_ROOT_PASSWORD: airflow-db
+#      MYSQL_PORT_3306_TCP_ADDR: 192.168.56.21
+#      REDIS_PORT_6379_TCP_ADDR: 192.168.56.21
+#      AWS_S3_BUCKET_NAME: s3-aiflow-logs
+    entrypoint: /root/entrypoint_worker.sh
