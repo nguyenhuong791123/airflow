@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  af-db:
+    container_name: "af-db"
+    image: mysql:5.7
+    volumes:
+      - /home/db:/var/lib/mysql
+      - /home/docker/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    restart: always
+    env_file:
+      - ./db/mysql.env
+#    environment:
+#      MYSQL_ROOT_PASSWORD: airflow-db
+#      MYSQL_DATABASE: airflow
+#      MYSQL_USER: airflow
+#      MYSQL_PASSWORD: ariflow-db
+#      MYSQL_PORT: 3306
+#      TZ: 'Asia/Tokyo'
+    ports:
+      - "3306:3306"
+#      - "33060:33060"
+#    command: env
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+
+  af-redis:
+    container_name: "af-redis"
+    image: redis:4-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - /homw/redis:/data
