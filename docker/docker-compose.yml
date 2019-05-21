@@ -107,39 +107,41 @@ services:
       - af-db
       - af-redis
 
-  # af-vscode:
-  #   container_name: "af-vscode"
-  #   image: codercom/code-server
-  #   volumes:
-  #     - /home/airflow:/home/coder/project
-  #   restart: always
-  #   ports:
-  #     - "3443:8443"
-  #   entrypoint: "code-server --allow-http --no-auth"
+  af-vscode:
+    container_name: "af-vscode"
+    image: codercom/code-server
+    volumes:
+      - /home/airflow:/home/coder/project
+    restart: always
+    ports:
+      - "3443:8443"
+    entrypoint: "code-server --allow-http --no-auth"
 
-  # af-phpadmin:
-  #   container_name: "af-phpadmin"
-  #   image: phpmyadmin/phpmyadmin
-  #   environment:
-  #     - PMA_ARBITRARY=1
-  #     - PMA_HOST=af-db
-  #     - PMA_USER=root
-  #     - PMA_PASSWORD=airflow-db
-  #   links:
-  #     - af-db
-  #   ports:
-  #     - 48080:80
-  #   volumes:
-  #     - /home/phpadmin:/sessions
+  af-phpadmin:
+    container_name: "af-phpadmin"
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=af-db
+      - PMA_USER=root
+      - PMA_PASSWORD=airflow-db
+    links:
+      - af-db
+    ports:
+      - 48080:80
+    volumes:
+      - /home/phpadmin:/sessions
 
-  # af-redisui:
-  #   container_name: "af-redisui"
-  #   image: tenstartups/redis-commander
-  #   command: --redis-host af-redis
-  #   links:
-  #     - af-redis
-  #   ports:
-  #     - '48081:8081'
+  af-redisui:
+    container_name: "af-redisui"
+    image: tenstartups/redis-commander
+    restart: always
+    command: --redis-host af-redis
+    links:
+      - af-redis
+    ports:
+      - '48081:8081'
 
   # af-nginx:
   #   container_name: "af-nginx"

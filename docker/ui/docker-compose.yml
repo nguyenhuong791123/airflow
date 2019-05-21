@@ -5,7 +5,7 @@ services:
     container_name: "af-vscode"
     image: codercom/code-server
     volumes:
-      - /home/airflow:/home/coder/project
+      - /home/airflow/dags:/home/coder/project
     network_mode: docker_default
     restart: always
     ports:
