@@ -3,6 +3,8 @@ from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
 from airflow.operators.email_operator import EmailOperator
+from airflow.operators.mysql_operator import MySqlOperator
+# from airflow.hooks import MySqlHook
 
 default_args = {
     'owner': 'Airflow'
@@ -24,6 +26,12 @@ task2 = BashOperator(
     bash_command='echo "hello world!!"',
     dag=dag)
 
+task3 = MySqlOperator(
+    mysql_conn_id='airflow_db',
+    task_id='basic_mysql',
+    sql="SELECT * FROM `dag`",
+    dag=dag)
+
 
 EMAIL_CONTENT = """
 
@@ -42,4 +50,5 @@ send_mail = EmailOperator (
     html_content=EMAIL_CONTENT)
 
 task1.set_downstream(task2)
+task2.set_downstream(task3)
 send_mail.set_upstream(task2)
