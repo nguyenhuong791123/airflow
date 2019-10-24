@@ -1,23 +1,27 @@
-version: '2'
+version: '3'
 
 services:
   af-db:
     container_name: "af-db"
-    image: mysql:5.7
-    volumes:
-      - /home/db:/var/lib/mysql
-      - /home/airflow/docker/db/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    image: nhdocker/mysql:latest
+    build:
+      context: ./db
+      dockerfile: Dockerfile
     restart: always
+    volumes:
+      - //C/Users/huongnv/airflow/docker/db/data:/var/lib/mysql
+      - //C/Users/huongnv/airflow/docker/db/logs:/var/log/mysql
+      # - //C/Users/huongnv/airflow/docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
       MYSQL_ROOT_PASSWORD: airflow-db
       MYSQL_DATABASE: airflow
       MYSQL_USER: airflow
-      MYSQL_PASSWORD: ariflow-db
+      MYSQL_PASSWORD: airflow-db
       MYSQL_PORT: 3306
       TZ: 'Asia/Tokyo'
     ports:
       - "3306:3306"
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    # command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
 
   af-redis:
     container_name: "af-redis"
@@ -28,7 +32,7 @@ services:
     container_name: "af-scheduler"
     image: nhdocker/airflow:v01
     volumes:
-      - /home/airflow/dags:/airflow/dags
+      - //C/Users/huongnv/airflow/docker/dags:/airflow/dags
     build:
       context: .
       dockerfile: Dockerfile
@@ -46,7 +50,7 @@ services:
     container_name: "af-webserver"
     image: nhdocker/airflow:v01
     volumes:
-      - /home/airflow/dags:/airflow/dags
+      - $PWD/dags:/airflow/dags
     build:
       context: .
       dockerfile: Dockerfile
@@ -69,7 +73,7 @@ services:
     container_name: "af-worker"
     image: nhdocker/airflow:v01
     volumes:
-      - /home/airflow/dags:/airflow/dags
+      - //C/Users/huongnv/airflow/docker/dags:/airflow/dags
     build:
       context: .
       dockerfile: Dockerfile
@@ -107,41 +111,41 @@ services:
       - af-db
       - af-redis
 
-  af-vscode:
-    container_name: "af-vscode"
-    image: codercom/code-server
-    volumes:
-      - /home/airflow:/home/coder/project
-    restart: always
-    ports:
-      - "3443:8443"
-    entrypoint: "code-server --allow-http --no-auth"
+  # af-vscode:
+  #   container_name: "af-vscode"
+  #   image: codercom/code-server
+  #   volumes:
+  #     - $PWD:$PWD/coder/project
+  #   restart: always
+  #   ports:
+  #     - "3443:8443"
+  #   entrypoint: "code-server --allow-http --no-auth"
 
-  af-phpadmin:
-    container_name: "af-phpadmin"
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    environment:
-      - PMA_ARBITRARY=1
-      - PMA_HOST=af-db
-      - PMA_USER=root
-      - PMA_PASSWORD=airflow-db
-    links:
-      - af-db
-    ports:
-      - 48080:80
-    volumes:
-      - /home/phpadmin:/sessions
+  # af-phpadmin:
+  #   container_name: "af-phpadmin"
+  #   image: phpmyadmin/phpmyadmin
+  #   restart: always
+  #   environment:
+  #     - PMA_ARBITRARY=1
+  #     - PMA_HOST=af-db
+  #     - PMA_USER=root
+  #     - PMA_PASSWORD=airflow-db
+  #   links:
+  #     - af-db
+  #   ports:
+  #     - 48080:80
+  #   volumes:
+  #     - $PWD/phpadmin:/sessions
 
-  af-redisui:
-    container_name: "af-redisui"
-    image: tenstartups/redis-commander
-    restart: always
-    command: --redis-host af-redis
-    links:
-      - af-redis
-    ports:
-      - '48081:8081'
+  # af-redisui:
+  #   container_name: "af-redisui"
+  #   image: tenstartups/redis-commander
+  #   restart: always
+  #   command: --redis-host af-redis
+  #   links:
+  #     - af-redis
+  #   ports:
+  #     - '48081:8081'
 
   # af-nginx:
   #   container_name: "af-nginx"
