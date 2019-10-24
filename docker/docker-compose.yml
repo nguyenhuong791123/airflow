@@ -50,7 +50,7 @@ services:
     container_name: "af-webserver"
     image: nhdocker/airflow:v01
     volumes:
-      - $PWD/dags:/airflow/dags
+      - //C/Users/huongnv/airflow/docker/dags:/airflow/dags
     build:
       context: .
       dockerfile: Dockerfile
