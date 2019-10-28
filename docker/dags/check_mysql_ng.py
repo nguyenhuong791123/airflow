@@ -6,6 +6,7 @@ from airflow.operators.email_operator import EmailOperator
 from airflow.operators.mysql_operator import MySqlOperator
 from airflow.hooks.mysql_hook import MySqlHook
 from airflow.utils.email import send_email
+from smtplib import SMTPException
 
 default_args = {
     'owner': 'SC APP'
@@ -27,32 +28,23 @@ def send(content):
         <li>Context: %s</li>
     </ul>
 
-    """ % ("{{ task_instance_key_str }}", "{{ task.owner}}", "{{ ti.hostname }}", content)
-    print(EMAIL_CONTENT)
-    send_email(to=['nguyenhuong791123@gmail.com'],
-        subject='send_mail',
-        html_content=EMAIL_CONTENT)
-    # send = EmailOperator (
-    #     dag=dag,
-    #     task_id="send_mail",
-    #     to=["nguyenhuong791123@gmail.com"],
-    #     subject="バッチ成功: 実行日 {{ ds }}",
-    #     html_content=EMAIL_CONTENT)
+    """ % ("{{ task_instance_key_str }}", "{{ task.owner }}", "{{ ti.hostname }}", content)
+    try:
+        send_email(to=['nguyenhuong791123@gmail.com'], subject='send_mail', html_content=EMAIL_CONTENT)
+    except SMTPException:
+        print('Can not send mail to nguyenhuong791123@gmail.com')
+    except Exception as e:
+        print('Exception:' + str(e))
+    finally:
+        print('Complete !!!')
 
 class ReturningMySqlOperator(MySqlOperator):
     def execute(self, context):
         self.log.info('Executing: %s', self.sql)
-        hook = MySqlHook(mysql_conn_id=self.mysql_conn_id,
-                         schema=self.database)
-        return hook.get_records(
-            self.sql,
-            parameters=self.parameters)
+        hook = MySqlHook(mysql_conn_id=self.mysql_conn_id, schema=self.database)
+        return hook.get_records(self.sql, parameters=self.parameters)
 
-t1 = ReturningMySqlOperator(
-    task_id='basic_mysql',
-    mysql_conn_id='airflow_db',
-    sql="select * from dag",
-    dag=dag)
+t1 = ReturningMySqlOperator(task_id='basic_mysql', mysql_conn_id='airflow_db', sql="select * from dag", dag=dag)
 
 def get_records(**kwargs):
     ti = kwargs['ti']
@@ -65,10 +57,6 @@ def get_records(**kwargs):
     # Get data in your logs
     # logging.info(string_to_print)
 
-t2 = PythonOperator(
-    task_id='日本語',
-    provide_context=True,
-    python_callable=get_records,
-    dag=dag)
+t2 = PythonOperator(task_id='日本語', provide_context=True, python_callable=get_records, dag=dag)
 
 t1 >> t2
