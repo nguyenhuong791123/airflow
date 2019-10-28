@@ -50,7 +50,8 @@ def get_records(**kwargs):
     ti = kwargs['ti']
     xcom = ti.xcom_pull(task_ids='basic_mysql')
     for x in xcom:
-        # print(x)
+        for i in x:
+            print(i)
         send(x)
 
     # string_to_print = 'Value in xcom is: {}'.format(xcom)
